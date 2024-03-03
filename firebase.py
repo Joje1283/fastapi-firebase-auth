@@ -1,7 +1,8 @@
 import json
+from jose import jwt
 from firebase_admin import auth, credentials, initialize_app
 from firebase_admin.auth import UserRecord
-from config import config
+from config import config, aget_fb_public_key
 import requests
 from loguru import logger
 
@@ -10,10 +11,11 @@ cred = credentials.Certificate("serviceAccountKey.json")
 
 # Firebase Console > Settings > General > Web API Key
 API_KEY = config.FB_API_KEY
+TARGET_AUDIENCE = cred.project_id
 initialize_app(cred)
 
 
-async def jwt_decode(token: str) -> dict:
+async def jwt_decode_by_fb_admin(token: str) -> dict:
     """
     Firebase JWT 디코딩
     """
@@ -22,6 +24,27 @@ async def jwt_decode(token: str) -> dict:
         return decoded_token
     except Exception as e:
         logger.error(e)
+
+
+async def jwt_decode(token: str) -> dict:
+    """
+    직접 디코딩
+    """
+    try:
+        decoded_token = jwt.decode(
+            token, config.FB_CERTS, algorithms="RS256", audience=TARGET_AUDIENCE
+        )
+        return decoded_token
+    except Exception as e:
+        try:
+            certs = await aget_fb_public_key()
+            config.FB_CERTS = certs
+            decoded_token = jwt.decode(
+                token, config.FB_CERTS, algorithms="RS256", audience=TARGET_AUDIENCE
+            )
+            return decoded_token
+        except Exception as e:
+            logger.error(e)
 
 
 def generate_token_by_uid(uid):
@@ -60,7 +83,7 @@ if __name__ == "__main__":
         token = generate_token_by_uid(uid)
         id_token = token.get("idToken")
         print(id_token)
-        decoded = await jwt_decode(id_token)
+        decoded = await jwt_decode_by_fb_admin(id_token)
         print(decoded)
 
     asyncio.run(main())
