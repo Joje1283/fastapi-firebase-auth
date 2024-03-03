@@ -3,6 +3,7 @@ from firebase_admin import auth, credentials, initialize_app
 from firebase_admin.auth import UserRecord
 from config import config
 import requests
+from loguru import logger
 
 # Firebase Console > Settings > Service Accounts > Generate New Private key
 cred = credentials.Certificate("serviceAccountKey.json")
@@ -12,7 +13,7 @@ API_KEY = config.FB_API_KEY
 initialize_app(cred)
 
 
-async def decode_fb_jwt(token: str) -> dict:
+async def jwt_decode(token: str) -> dict:
     """
     Firebase JWT 디코딩
     """
@@ -20,7 +21,7 @@ async def decode_fb_jwt(token: str) -> dict:
         decoded_token = auth.verify_id_token(token)
         return decoded_token
     except Exception as e:
-        return {}
+        logger.error(e)
 
 
 def generate_token_by_uid(uid):
@@ -59,7 +60,7 @@ if __name__ == "__main__":
         token = generate_token_by_uid(uid)
         id_token = token.get("idToken")
         print(id_token)
-        decoded = await decode_fb_jwt(id_token)
+        decoded = await jwt_decode(id_token)
         print(decoded)
 
     asyncio.run(main())
