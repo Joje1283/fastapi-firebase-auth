@@ -83,7 +83,5 @@ if __name__ == "__main__":
         token = generate_token_by_uid(uid)
         id_token = token.get("idToken")
         print(id_token)
-        decoded = await jwt_decode_by_fb_admin(id_token)
-        print(decoded)
 
     asyncio.run(main())
