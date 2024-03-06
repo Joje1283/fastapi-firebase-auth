@@ -15,9 +15,9 @@ TARGET_AUDIENCE = cred.project_id
 initialize_app(cred)
 
 
-async def jwt_decode_by_fb_admin(token: str) -> dict:
+async def jwt_decode_by_fb_auth(token: str) -> dict:
     """
-    Firebase JWT 디코딩
+    JWT Decode by Firebase Admin
     """
     try:
         decoded_token = auth.verify_id_token(token)
@@ -28,7 +28,7 @@ async def jwt_decode_by_fb_admin(token: str) -> dict:
 
 async def jwt_decode(token: str) -> dict:
     """
-    직접 디코딩
+    JWT Decode
     """
     try:
         decoded_token = jwt.decode(
