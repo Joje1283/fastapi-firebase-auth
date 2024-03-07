@@ -1,4 +1,4 @@
-# Run server
+# fastapi-firebase-auth
 a simple server that jwt token authentication by firebase
 
 ### build
